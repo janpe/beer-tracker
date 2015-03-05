@@ -1,0 +1,9 @@
+@(items: List[Beer])
+
+@main("Welcome to Play") {
+    <ul>
+    @for(item <- items) {
+        <li>@items.lift(1)</li>
+    }
+    </ul>
+}

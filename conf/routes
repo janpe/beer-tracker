@@ -1,0 +1,16 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET     /                           controllers.Application.index
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.at(path="/public", file)
+
+# REST API Methods
+GET     /beers                      controllers.Application.listBeers(index: Integer = -1)
+GET     /beers/:index               controllers.Application.listBeers(index: Integer)
+POST    /beers                      controllers.Application.saveBeer
+PUT     /beers/:index               controllers.Application.updateBeer(index: Integer)
+DELETE  /beers/:index               controllers.Application.deleteBeer(index: Integer)
