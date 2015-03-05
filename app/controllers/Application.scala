@@ -23,7 +23,7 @@ object Application extends Controller {
     }
     
     implicit val beerReads: Reads[Beer] = (
-        (JsPath \ "name").read[String] and
+        (JsPath \ "name").readNullable[String] and
         (JsPath \ "beer_type").readNullable[String] and
         (JsPath \ "brewery").readNullable[String] and
         (JsPath \ "abv").readNullable[Double] and
@@ -80,6 +80,7 @@ object Application extends Controller {
         if(Beer.list.lift(index) != None) {
             val newValues = Beer.list.lift(index).get
             val updateBeerResult = Json.fromJson(request.body)
+            Predef.println(updateBeerResult)
             updateBeerResult.fold(
                 errors => {
                     BadRequest(Json.obj("success" ->"false", "error" -> "Invalid json"))
