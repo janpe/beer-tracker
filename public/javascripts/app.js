@@ -10,12 +10,15 @@ var Header = React.createClass({
 });
 
 var SearchBar = React.createClass({
+    getInitialState: function() {
+        return {searchText: ''};
+    },
     searchHandler: function() {
-        this.props.searchHandler(this.refs.searchKey.getDOMNode().value);
+        this.props.searchHandler(this.refs.searchTextInput.getDOMNode().value);
     },
     render: function () {
         return (
-            <div className="beer-search"><input type="search" ref="searchKey" onChange={this.searchHandler}/></div>
+            <div className="beer-search"><input type="search" ref="searchTextInput" value={this.props.searchText} onChange={this.searchHandler}/></div>
         );
     }
 });
@@ -54,16 +57,16 @@ var BeerList = React.createClass({
 
 var HomePage = React.createClass({
     getInitialState: function() {
-        return {beers: []};
+        return {beers: this.props.service.getBeers(), searchText: ''};
     },
     searchHandler:function(key) {
-        this.setState({searchKey: key, beers: this.props.service.findByName(key)});
+        this.setState({searchText: key, beers: this.props.service.findByName(key)});
     },
     render: function () {
         return (
             <div>
                 <Header text="beer-tracker"/>
-                <SearchBar searchHandler={this.searchHandler} />
+                <SearchBar searchHandler={this.searchHandler} searchText={this.state.searchText} />
                 <BeerList beers={this.state.beers} />
             </div>
         );
@@ -75,7 +78,6 @@ var BeerPage = React.createClass({
         return {beer: {}};
     },
     componentDidMount: function() {
-        console.log(this.props);
         this.setState({beer: this.props.service.findById(this.props.beerId)});
     },
     render: function () {

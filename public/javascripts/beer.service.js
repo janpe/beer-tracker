@@ -17,6 +17,10 @@ beerService = (function () {
         });
         return results;
     },
+        
+    getBeers = function () {
+        return beers;
+    }
     
     beers = [];
     var xmlHttp = null;
@@ -31,7 +35,8 @@ beerService = (function () {
     // The public API
     return {
         findById: findById,
-        findByName: findByName
+        findByName: findByName,
+        getBeers: getBeers
     };
 
 }());
