@@ -1,6 +1,9 @@
 @(items: List[Beer])
 
 @main("beer-tracker") {
+    <header>
+        <h1>beer-tracker</h1>
+    </header>
     <div class="beers-list">
     @for(item <- items) {
         <div class="beers-list__beer">
