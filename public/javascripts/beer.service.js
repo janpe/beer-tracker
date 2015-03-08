@@ -51,21 +51,12 @@ beerService = (function () {
         
     // Get all items for listing
     getBeers = function() {
+        getItems();
         return beers;
     },
-    
-    // Put updated changes into backend
-    put = function(putBeer) {
-        var xmlHttp = null;
-        xmlHttp = new XMLHttpRequest();
-        xmlHttp.open("PUT", apiPath+"/"+putBeer.id, true);
-        xmlHttp.setRequestHeader("Content-type", "application/json");
-        xmlHttp.send(JSON.stringify(putBeer));
-        get();
-    },
-    
-    // Get all items from from the API
-    get = function() {
+        
+    // GET all items from from the API
+    getItems = function() {
         beers = [];
         var xmlHttp = null;
         xmlHttp = new XMLHttpRequest();
@@ -75,9 +66,43 @@ beerService = (function () {
         for(i in beersJson) {
             beers.push(beersJson[i]);
         }
+    },
+      
+    // POST new item 
+    postItem = function(postBeer, callback) {
+        var xmlHttp = null;
+        xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("POST", apiPath, true);
+        xmlHttp.setRequestHeader("Content-type", "application/json");
+        xmlHttp.send(JSON.stringify(postBeer));
+        xmlHttp.onreadystatechange = function() {
+            if (xmlHttp.readyState == 4) {
+                callback(JSON.parse(xmlHttp.responseText).beer.id);
+                getItems();
+            }
+        }
+    },
+    
+    // PUT updated item
+    putItem = function(putBeer) {
+        var xmlHttp = null;
+        xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("PUT", apiPath+"/"+putBeer.id, true);
+        xmlHttp.setRequestHeader("Content-type", "application/json");
+        xmlHttp.send(JSON.stringify(putBeer));
+        getItems();
+    },
+        
+    // DELETE item
+    deleteItem = function(deleteId) {
+        var xmlHttp = null;
+        xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("DELETE", apiPath+"/"+deleteId, true);
+        xmlHttp.send();
+        getItems();
     };
     
-    get();
+    getItems();
 
     return {
         findById: findById,
@@ -85,7 +110,9 @@ beerService = (function () {
         findByBrewery: findByBrewery,
         search: search,
         getBeers: getBeers,
-        put: put
+        postItem: postItem,
+        putItem: putItem,
+        deleteItem: deleteItem
     };
 
 }());

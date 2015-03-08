@@ -118,15 +118,15 @@ object Application extends Controller {
         }
     }
     
-    def deleteBeer(index: Integer) = Action {
-        if(Beer.list.lift(index) != None) {
-            Beer.list = Beer.list.drop(index+1)
+    def deleteBeer(id: Integer) = Action {
+        if(Beer.list.find(beer => beer.id.get == id) != None) {
+            Beer.list = Beer.list.slice(0, Beer.list.indexOf(Beer.list.find(beer => beer.id.get == id).get)) ::: Beer.list.slice(Beer.list.indexOf(Beer.list.find(beer => beer.id.get == id).get) + 1, Beer.list.length + 1)
             printToFile(new File("beers.json")) { p =>
                 p.print(Json.toJson(Beer.list));
             }
             Ok(Json.obj("success" -> "true", "beerList" -> Beer.list))
         } else {
-            Ok(Json.obj("success" -> "false", "error" -> "Index of ".concat(index.toString).concat(" is empty")))
+            Ok(Json.obj("success" -> "false", "error" -> "No beer with id: ".concat(index.toString)))
         }
     }
     
