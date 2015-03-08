@@ -12,6 +12,10 @@ object Beer {
     }
     
     def generateId = {
-        Some(list.sortBy(beer => (beer.id)).last.id.get + 1)
+        if(list.length > 0) {
+            Some(list.sortBy(beer => (beer.id)).last.id.get + 1)
+        } else {
+            Some(1)
+        }
     }
 }

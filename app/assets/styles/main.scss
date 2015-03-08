@@ -74,6 +74,23 @@ a {
     
 }
 
+button, input {
+    font-family: 'Oswald', sans-serif;
+}
+
+button, input[type="submit"], a.button {
+    background: #333;
+    border-radius: 2px;
+    border: none;
+    color: #fff;
+    padding: 0.5em 10px 0.5em 15px;
+    font-size: 0.6em;
+    font-weight: 300;
+    display: inline-block;
+    margin-right: 0.75em;
+    letter-spacing: 5px;
+}
+
 small {
     font-size: 0.75em;
     line-height: 1.5em;
@@ -88,12 +105,26 @@ header {
     padding: 1em 0;
 }
 
-.go-back {
+.header-button {
+    background: #555;
+    border-radius: 2px;
+    border: none;
     color: #fff;
+    padding: 0.5em 1em;
+    font-weight: 300;
+    display: inline-block;
     position: absolute;
-    left: 0;
-    top: 0;
-    padding: 1em 2em;
+    margin: 1em 2em;
+    
+    &__back {
+        top: 0;
+        left: 0;
+    }
+    
+    &__add-beer {
+        top: 0;
+        right: 0;
+    }
 }
 
 .search-area {
@@ -134,7 +165,7 @@ header {
 .beer-list-item__content {
     margin: 0 1.5em;
     padding: 1em;
-    border-radius: 5px;
+    border-radius: 2px;
     background: #f2f2f2;
 }
 
@@ -143,6 +174,15 @@ header {
     font-size: 1.25em;
     line-height: 1.5em;
     font-weight: 400;
+}
+
+.beer-info__header {
+    height: 2em;
+    margin-bottom: 0.5em;
+}
+
+.beer-info__footer {
+    margin-top: 0.5em;
 }
 
 .beer-info__row {
