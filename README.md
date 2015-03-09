@@ -10,7 +10,9 @@ Frontend built with React. Bourbon Neat used for some responsive styles.
 
 To run the app install Play Framework through Typesafe Activator ([https://www.playframework.com/documentation/2.3.x/Installing](https://www.playframework.com/documentation/2.3.x/Installing)) and run it with the command.
 
-```activator run```
+```
+activator run
+```
 
 The app can now be used in the browser by navigating to http://localhost:9000/
 
@@ -33,25 +35,33 @@ The app can now be used in the browser by navigating to http://localhost:9000/
 
 Simply do a GET request to /beers
 
-```curl --include --request GET http://localhost:9000/beers```
+```
+curl --include --request GET http://localhost:9000/beers
+```
 
 ### POST
 
 Do a POST request to /beers with header "Content-type: application/json" and Json data containing at least the required properties
 
-```curl --include --request POST --header "Content-type: application/json" --data '{"name": "My favourite beer", "rating": 100}' http://localhost:9000/beers```
+```
+curl --include --request POST --header "Content-type: application/json" --data '{"name": "My favourite beer", "rating": 100}' http://localhost:9000/beers
+```
 
 ### PUT
 
 Do a PUT request to /beers/:id with header "Content-type: application/json" and Json data containing the desired updates to the object
 
-```curl --include --request PUT --header "Content-type: application/json" --data '{"name": "My least favourite beer", "rating": 10}' http://localhost:9000/beers/1```
+```
+curl --include --request PUT --header "Content-type: application/json" --data '{"name": "My least favourite beer", "rating": 10}' http://localhost:9000/beers/1
+```
 
 ### DELETE
 
 Simply do a DELETE request to /beers/:id
 
-```curl --include --request DELETE http://localhost:9000/beers/1```
+```
+curl --include --request DELETE http://localhost:9000/beers/1
+```
 
 ## License
 
