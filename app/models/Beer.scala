@@ -18,4 +18,19 @@ object Beer {
             Some(1)
         }
     }
+    
+    // Validate beer values before saving
+    def validateBeer(beer: Beer) = {
+        var errors: Map[String, String] = Map()
+        if(beer.name.isEmpty) {
+            errors += ("name" -> "Beer name cannot be empty")
+        }
+        if(beer.abv != None && (beer.abv.get > 100 || beer.abv.get < 0)) {
+            errors += ("abv" -> "Beer abv must be between 0-100")
+        }
+        if(beer.rating != None && (beer.rating.get > 100 || beer.rating.get < 1)) {
+            errors += ("rating" -> "Beer rating must be between 1-100")
+        }
+        errors
+    }
 }

@@ -49,16 +49,16 @@ object Application extends Controller {
     }
 
     def index = Action {
-        Ok(views.html.index(Beer.list))
+        Ok(views.html.index())
     }
     
-    def listBeers(id: Integer) = Action {
+    def listBeers(id: Int) = Action {
         if(id > 0) {
             if(Beer.list.find(beer => beer.id.get == id) != None) {
                 val json = Json.toJson(Beer.list.find(beer => beer.id.get == id).get)
                 Ok(json)
             } else {
-                Ok(Json.obj("success" -> false, "error" -> "No beer with id: ".concat(id.toString)))
+                BadRequest(Json.obj("success" -> false, "error" -> "No beer with id: ".concat(id.toString)))
             }
         } else {
             val json = Json.toJson(Beer.list)
@@ -70,63 +70,73 @@ object Application extends Controller {
         val beerResult = Json.fromJson[Beer](request.body)
         beerResult.fold(
             errors => {
-                BadRequest(Json.obj("success" ->false, "message" -> "Invalid json"))
+                BadRequest(Json.obj("success" ->false, "errors" -> JsError.toFlatJson(errors)))
             },
             beer => {
-                val saveBeer = Beer(
-                    Beer.generateId,
-                    beer.name,
-                    beer.beer_type,
-                    beer.brewery,
-                    beer.abv,
-                    beer.hops,
-                    beer.country,
-                    beer.rating,
-                    beer.todo
-                )
-                Beer.save(saveBeer)
-                printToFile(new File("beers.json")) { p =>
-                    p.print(Json.toJson(Beer.list));
+                val validation = Beer.validateBeer(beer)
+                if(!validation.isEmpty) {
+                    BadRequest(Json.obj("success" -> false, "errors" -> Json.toJson(validation)))
+                } else {
+                    val saveBeer = Beer(
+                        Beer.generateId,
+                        beer.name,
+                        beer.beer_type,
+                        beer.brewery,
+                        beer.abv,
+                        beer.hops,
+                        beer.country,
+                        beer.rating,
+                        beer.todo
+                    )
+                    Beer.save(saveBeer)
+                    printToFile(new File("beers.json")) { p =>
+                        p.print(Json.toJson(Beer.list));
+                    }
+                    Ok(Json.obj("success" ->true, "beer" -> saveBeer))
                 }
-                Ok(Json.obj("success" ->true, "beer" -> saveBeer))  
             }
         )
     }
     
-    def updateBeer(id: Integer) = Action(BodyParsers.parse.json) { request =>
+    def updateBeer(id: Int) = Action(BodyParsers.parse.json) { request =>
         if(Beer.list.find(beer => beer.id.get == id) != None) {
             val oldValues = Beer.list.find(beer => beer.id.get == id).get
             val updateBeerResult = Json.fromJson(request.body)
             updateBeerResult.fold(
                 errors => {
-                    BadRequest(Json.obj("success" ->false, "error" -> "Invalid json"))
+                    BadRequest(Json.obj("success" ->false, "errors" -> JsError.toFlatJson(errors)))
                 },
                 beer => {
-                    val updateBeer = Beer(
-                        oldValues.id,
-                        if (beer.name != None) beer.name else oldValues.name,
-                        if (beer.beer_type != None) beer.beer_type else oldValues.beer_type,
-                        if (beer.brewery != None) beer.brewery else oldValues.brewery,
-                        if (beer.abv != None) beer.abv else oldValues.abv,
-                        if (beer.hops != None) beer.hops else oldValues.hops,
-                        if (beer.country != None) beer.country else oldValues.country,
-                        if (beer.rating != None) beer.rating else oldValues.rating,
-                        if (beer.todo != None) beer.todo else oldValues.todo
-                    )
-                    val updatedList = Beer.list.updated(Beer.list.indexOf(Beer.list.find(beer => beer.id.get == id).get), updateBeer)
-                    Beer.list = updatedList
-                    printToFile(new File("beers.json")) { p =>
-                        p.print(Json.toJson(Beer.list));
+                    val validation = Beer.validateBeer(beer)
+                    if(!validation.isEmpty) {
+                        BadRequest(Json.obj("success" -> false, "errors" -> Json.toJson(validation)))
+                    } else {
+                        val updateBeer = Beer(
+                            oldValues.id,
+                            if (beer.name != None) beer.name else oldValues.name,
+                            if (beer.beer_type != None) beer.beer_type else oldValues.beer_type,
+                            if (beer.brewery != None) beer.brewery else oldValues.brewery,
+                            if (beer.abv != None) beer.abv else oldValues.abv,
+                            if (beer.hops != None) beer.hops else oldValues.hops,
+                            if (beer.country != None) beer.country else oldValues.country,
+                            if (beer.rating != None) beer.rating else oldValues.rating,
+                            if (beer.todo != None) beer.todo else oldValues.todo
+                        )
+                        val updatedList = Beer.list.updated(Beer.list.indexOf(Beer.list.find(beer => beer.id.get == id).get), updateBeer)
+                        Beer.list = updatedList
+                        printToFile(new File("beers.json")) { p =>
+                            p.print(Json.toJson(Beer.list));
+                        }
+                        Ok(Json.obj("success" ->true, "updated" -> updateBeer))
                     }
-                    Ok(Json.obj("success" ->true, "updated" -> updateBeer))  
                 }
             )
         } else {
-            Ok(Json.obj("success" -> false, "error" -> "No beer with id: ".concat(index.toString)))
+            BadRequest(Json.obj("success" -> false, "error" -> "No beer with id: ".concat(id.toString)))
         }
     }
     
-    def deleteBeer(id: Integer) = Action {
+    def deleteBeer(id: Int) = Action {
         if(Beer.list.find(beer => beer.id.get == id) != None) {
             Beer.list = Beer.list.slice(0, Beer.list.indexOf(Beer.list.find(beer => beer.id.get == id).get)) ::: Beer.list.slice(Beer.list.indexOf(Beer.list.find(beer => beer.id.get == id).get) + 1, Beer.list.length + 1)
             printToFile(new File("beers.json")) { p =>
@@ -134,7 +144,7 @@ object Application extends Controller {
             }
             Ok(Json.obj("success" -> true, "beerList" -> Beer.list))
         } else {
-            Ok(Json.obj("success" -> false, "error" -> "No beer with id: ".concat(index.toString)))
+            BadRequest(Json.obj("success" -> false, "error" -> "No beer with id: ".concat(id.toString)))
         }
     }
     
@@ -142,5 +152,4 @@ object Application extends Controller {
         val p = new java.io.PrintWriter(f)
         try { op(p) } finally { p.close() }
     }
-
 }

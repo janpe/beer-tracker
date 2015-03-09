@@ -1,21 +1,2 @@
-@(items: List[Beer])
-
 @main("beer-tracker") {
-    <header>
-        <h1>beer-tracker</h1>
-    </header>
-    <div class="beers-list">
-    @for(item <- items) {
-        <div class="beers-list__beer">
-            <div class="beers-list__beer-content">
-                @{if (item.name.isEmpty) "" else <h2>{item.name.get}</h2>}
-                @{if (item.brewery.isEmpty) "" else <h3>{item.brewery.get}</h3>}
-                @{if (item.beer_type.isEmpty) "" else <div class="beers-list__beer-info">Type: {item.beer_type.get}</div>}
-                @{if (item.abv.isEmpty) "" else <div class="beers-list__beer-info">Abv: {item.abv.get}%</div>}
-                @{if (item.country.isEmpty) "" else <div class="beers-list__beer-info">Country: {item.country.get}</div>}
-                @{if (!item.todo.get) "" else <div class="beers-list__beer-info"><small>This beer is still on your to-do list!</small></div>}
-            </div>
-        </div>
-    }
-    </div>
 }
