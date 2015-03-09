@@ -11,6 +11,8 @@ object Beer {
         list = list ::: List(beer)
     }
     
+    // Generate a id for a beer. With this logic different beers might have same id's at different times. 
+    // But at one time all id's should be unique
     def generateId = {
         if(list.length > 0) {
             Some(list.sortBy(beer => (beer.id)).last.id.get + 1)

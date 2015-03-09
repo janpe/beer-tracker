@@ -39,6 +39,7 @@ object Application extends Controller {
         (JsPath \ "image").readNullable[String]
     )(Beer.apply _)
     
+    // Try getting beers from json, throw exception if it fails
     try {
         val jsonList = Json.parse(scala.io.Source.fromFile("beers.json").mkString)
         jsonList.validate[List[Beer]] match {
@@ -57,7 +58,9 @@ object Application extends Controller {
         Ok(views.html.index())
     }
     
+    // Json list of the beers for GET request
     def listBeers(id: Int) = Action {
+        // Get a single beer if id is greater than 0. In routing default route gets id: -1. 
         if(id > 0) {
             if(Beer.list.find(beer => beer.id.get == id) != None) {
                 val json = Json.toJson(Beer.list.find(beer => beer.id.get == id).get)
@@ -70,7 +73,8 @@ object Application extends Controller {
             Ok(json)
         }
     }
-        
+    
+    // Save a new beer from POST request
     def saveBeer = Action(BodyParsers.parse.json) { request =>
         val beerResult = Json.fromJson[Beer](request.body)
         beerResult.fold(
@@ -104,17 +108,16 @@ object Application extends Controller {
         )
     }
     
+    // Update a beer from PUT request
     def updateBeer(id: Int) = Action(BodyParsers.parse.json) { request =>
         if(Beer.list.find(beer => beer.id.get == id) != None) {
             val oldValues = Beer.list.find(beer => beer.id.get == id).get
-            Predef.println(request.body)
             val updateBeerResult = Json.fromJson(request.body)
             updateBeerResult.fold(
                 errors => {
                     BadRequest(Json.obj("success" ->false, "errors" -> JsError.toFlatJson(errors)))
                 },
                 beer => {
-                    Predef.println(beer)
                     val validation = Beer.validateBeer(beer)
                     if(!validation.isEmpty) {
                         BadRequest(Json.obj("success" -> false, "errors" -> Json.toJson(validation)))
@@ -145,6 +148,7 @@ object Application extends Controller {
         }
     }
     
+    // Delete beer from DELETE request
     def deleteBeer(id: Int) = Action {
         if(Beer.list.find(beer => beer.id.get == id) != None) {
             Beer.list = Beer.list.slice(0, Beer.list.indexOf(Beer.list.find(beer => beer.id.get == id).get)) ::: Beer.list.slice(Beer.list.indexOf(Beer.list.find(beer => beer.id.get == id).get) + 1, Beer.list.length + 1)
@@ -157,6 +161,7 @@ object Application extends Controller {
         }
     }
     
+    // Store beer data in a Json-file
     def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
         val p = new java.io.PrintWriter(f)
         try { op(p) } finally { p.close() }

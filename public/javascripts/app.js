@@ -30,6 +30,8 @@ var SearchBar = React.createClass({
 
 var BeerListItem = React.createClass({
     getInitialState: function() {
+        
+        // Size and color of the rating-ball depend on how high the score is
         var ballSize = (this.props.beer.rating/100)*3.5 < 2 ? 2 : (this.props.beer.rating/100)*3.5;
         var ratingColor = "#fc605b";
         if(this.props.beer.rating >= 75) {
@@ -112,12 +114,15 @@ var BeerPage = React.createClass({
     },
     save: function(saveBeer, adding) {
         if(adding) {
+            // Saving new beer
             var self = this;
             this.props.service.postItem(saveBeer, function(id) {
                 self.setState({editable: false, beer: saveBeer});
+                // Let's save the route so that the deleting and editing is immediately possible after adding
                 router.load("#beers/" + id);
             });
         } else {
+            // Updating old beer
             this.props.service.putItem(saveBeer);
             this.setState({editable: false, beer: saveBeer});
         }
@@ -131,7 +136,9 @@ var BeerPage = React.createClass({
     },
     render: function () {
         var beerView;
+        // Determine if we should show edit or view mode.
         if(this.state.editable) {
+            // Let's view the edit mode and see if we're adding a new beer or updating an old one
             if(this.props.beerId == 'new') {
                 beerView = <BeerEdit addingBeer={true} service={beerService} save={this.save} />
             } else {
@@ -178,15 +185,20 @@ var BeerView = React.createClass({
 
 var BeerEdit = React.createClass({
     getInitialState: function() {
+        // imageCleared makes sure that an empty string is saved if old image is removed
+        // imageLoading disables form submit while image is being base64 encoded
         return {beer: this.props.beer, addingBeer: this.props.addingBeer ? true : false, imageCleared: false, imageLoading: false};
     },
     formSubmit: function(e) {
         e.preventDefault();
         var image = "";
         if(!this.state.imageCleared) {
+            // Image is not cleared, let's look if we have a new one or an old one
             if(typeof(this.state.imageDataUri) != 'undefined') {
+                // Image uploaded, let's save that one
                 image = this.state.imageDataUri;
             } else if(typeof(this.state.beer.image) != 'undefined') {
+                // Image not uploaded but old one fould, let's keep that one
                 image = this.state.beer.image;
             }
         }
@@ -202,8 +214,10 @@ var BeerEdit = React.createClass({
             image: image
         };
         if(this.state.addingBeer) {
+            // New beer being saved
             this.props.save(submitBeer, true);
         } else {
+            // Old beer being updated, let's add the id for the object for the PUT request
             submitBeer.id = this.state.beer.id;
             this.props.save(submitBeer);
         }
