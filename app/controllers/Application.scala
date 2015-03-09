@@ -37,15 +37,18 @@ object Application extends Controller {
         (JsPath \ "todo").readNullable[Boolean]
     )(Beer.apply _)
     
-    val jsonList = Json.parse(scala.io.Source.fromFile("beers.json").mkString)
-    
-    jsonList.validate[List[Beer]] match {
-        case s: JsSuccess[List[Beer]] => {
-            Beer.list = s.get
+    try {
+        val jsonList = Json.parse(scala.io.Source.fromFile("beers.json").mkString)
+        jsonList.validate[List[Beer]] match {
+            case s: JsSuccess[List[Beer]] => {
+                Beer.list = s.get
+            }
+            case e: JsError => {
+                Ok("Error")
+            }
         }
-        case e: JsError => {
-            Ok("Error")
-        }
+    } catch {
+        case ex: Exception => println(ex.getMessage)
     }
 
     def index = Action {
