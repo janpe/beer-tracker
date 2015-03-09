@@ -18,7 +18,9 @@ object Application extends Controller {
             "beer_type" -> beer.beer_type,
             "brewery" -> beer.brewery,
             "abv" -> beer.abv,
+            "hops" -> beer.hops,
             "country" -> beer.country,
+            "rating" -> beer.rating,
             "todo" -> beer.todo
         )
     }
@@ -29,7 +31,9 @@ object Application extends Controller {
         (JsPath \ "beer_type").readNullable[String] and
         (JsPath \ "brewery").readNullable[String] and
         (JsPath \ "abv").readNullable[Double] and
+        (JsPath \ "hops").readNullable[String] and
         (JsPath \ "country").readNullable[String] and
+        (JsPath \ "rating").readNullable[Int] and
         (JsPath \ "todo").readNullable[Boolean]
     )(Beer.apply _)
     
@@ -54,7 +58,7 @@ object Application extends Controller {
                 val json = Json.toJson(Beer.list.find(beer => beer.id.get == id).get)
                 Ok(json)
             } else {
-                Ok(Json.obj("success" -> "false", "error" -> "No beer with id: ".concat(id.toString)))
+                Ok(Json.obj("success" -> false, "error" -> "No beer with id: ".concat(id.toString)))
             }
         } else {
             val json = Json.toJson(Beer.list)
@@ -66,7 +70,7 @@ object Application extends Controller {
         val beerResult = Json.fromJson[Beer](request.body)
         beerResult.fold(
             errors => {
-                BadRequest(Json.obj("success" ->"false", "message" -> "Invalid json"))
+                BadRequest(Json.obj("success" ->false, "message" -> "Invalid json"))
             },
             beer => {
                 val saveBeer = Beer(
@@ -75,14 +79,16 @@ object Application extends Controller {
                     beer.beer_type,
                     beer.brewery,
                     beer.abv,
+                    beer.hops,
                     beer.country,
+                    beer.rating,
                     beer.todo
                 )
                 Beer.save(saveBeer)
                 printToFile(new File("beers.json")) { p =>
                     p.print(Json.toJson(Beer.list));
                 }
-                Ok(Json.obj("success" ->"true", "beer" -> saveBeer))  
+                Ok(Json.obj("success" ->true, "beer" -> saveBeer))  
             }
         )
     }
@@ -93,7 +99,7 @@ object Application extends Controller {
             val updateBeerResult = Json.fromJson(request.body)
             updateBeerResult.fold(
                 errors => {
-                    BadRequest(Json.obj("success" ->"false", "error" -> "Invalid json"))
+                    BadRequest(Json.obj("success" ->false, "error" -> "Invalid json"))
                 },
                 beer => {
                     val updateBeer = Beer(
@@ -102,7 +108,9 @@ object Application extends Controller {
                         if (beer.beer_type != None) beer.beer_type else oldValues.beer_type,
                         if (beer.brewery != None) beer.brewery else oldValues.brewery,
                         if (beer.abv != None) beer.abv else oldValues.abv,
+                        if (beer.hops != None) beer.hops else oldValues.hops,
                         if (beer.country != None) beer.country else oldValues.country,
+                        if (beer.rating != None) beer.rating else oldValues.rating,
                         if (beer.todo != None) beer.todo else oldValues.todo
                     )
                     val updatedList = Beer.list.updated(Beer.list.indexOf(Beer.list.find(beer => beer.id.get == id).get), updateBeer)
@@ -110,11 +118,11 @@ object Application extends Controller {
                     printToFile(new File("beers.json")) { p =>
                         p.print(Json.toJson(Beer.list));
                     }
-                    Ok(Json.obj("success" ->"true", "updated" -> updateBeer))  
+                    Ok(Json.obj("success" ->true, "updated" -> updateBeer))  
                 }
             )
         } else {
-            Ok(Json.obj("success" -> "false", "error" -> "No beer with id: ".concat(index.toString)))
+            Ok(Json.obj("success" -> false, "error" -> "No beer with id: ".concat(index.toString)))
         }
     }
     
@@ -124,9 +132,9 @@ object Application extends Controller {
             printToFile(new File("beers.json")) { p =>
                 p.print(Json.toJson(Beer.list));
             }
-            Ok(Json.obj("success" -> "true", "beerList" -> Beer.list))
+            Ok(Json.obj("success" -> true, "beerList" -> Beer.list))
         } else {
-            Ok(Json.obj("success" -> "false", "error" -> "No beer with id: ".concat(index.toString)))
+            Ok(Json.obj("success" -> false, "error" -> "No beer with id: ".concat(index.toString)))
         }
     }
     

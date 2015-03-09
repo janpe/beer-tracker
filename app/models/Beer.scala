@@ -1,6 +1,6 @@
 package models
 
-case class Beer(id: Option[Int], name: Option[String] = None, beer_type: Option[String] = None, brewery: Option[String] = None, abv: Option[Double] = None, country: Option[String] = None, todo: Option[Boolean] = None)
+case class Beer(id: Option[Int], name: Option[String] = None, beer_type: Option[String] = None, brewery: Option[String] = None, abv: Option[Double] = None, hops: Option[String], country: Option[String] = None, rating: Option[Int], todo: Option[Boolean] = None)
 
 object Beer {
     var list: List[Beer] = {

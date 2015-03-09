@@ -2,13 +2,13 @@ var Header = React.createClass({
     render: function () {
         return (
             <header>
-                { this.props.showBack ? <a className="header-button header-button__back" href="/#">&laquo; back</a> : null }
                 <h1>beer-tracker</h1>
                 <div className="search-area">
                     <label>Search</label>
                     <SearchBar searchHandler={this.props.searchHandler} searchText={this.props.searchText} />
-                    <a className="header-button header-button__add-beer" href="#beers/new">Add a new beer +</a>
                 </div>
+                { this.props.showBack ? <a className="header-button header-button__back" href="/#">&laquo; back</a> : null }
+                <a className="header-button header-button__add-beer" href="#beers/new">Add a new beer +</a>
             </header>
         );
     }
@@ -29,6 +29,25 @@ var SearchBar = React.createClass({
 });
 
 var BeerListItem = React.createClass({
+    getInitialState: function() {
+        var ballSize = (this.props.beer.rating/100)*3.5 < 2 ? 2 : (this.props.beer.rating/100)*3.5;
+        var ratingColor = "#fc605b";
+        if(this.props.beer.rating >= 75) {
+            ratingColor = "#34c849";
+        } else if(this.props.beer.rating >= 50) {
+            ratingColor = "#fdbc40";
+        } else if(this.props.beer.rating >= 25) {
+            ratingColor = "#fd8f4e";
+        }
+        return {ballStyle: {
+            height: ballSize+"em",
+            width: ballSize+"em",
+            lineHeight: ballSize+"em",
+            left: -ballSize/3+"em",
+            top: -ballSize/3+"em",
+            background: ratingColor
+        }};
+    },
     render: function () {
         return (
             <a className="beer-list-item" href={"#beers/" + this.props.beer.id}>
@@ -37,6 +56,7 @@ var BeerListItem = React.createClass({
                     {this.props.beer.brewery ? <h3>{this.props.beer.brewery}</h3> : null}
                     {this.props.beer.beer_type ? <div className="beer-list-item__info">Type: {this.props.beer.beer_type}</div> : null}
                     {this.props.beer.abv ? <div className="beer-list-item__info">Abv: {this.props.beer.abv}%</div> : null}
+                    {this.props.beer.rating ? <div className="beer-list-item__rating" style={this.state.ballStyle}>{this.props.beer.rating}</div> : null}
                     {this.props.beer.todo ? <div className="beer-list-item__info"><small>This beer is still on your to-do list!</small></div> : null}
                 </div>
             </a>
@@ -123,7 +143,9 @@ var BeerPage = React.createClass({
         return (
             <div>
                 <Header showBack={true} />
-                {beerView}
+                <div className="wrapper">
+                    {beerView}
+                </div>
             </div>
         );
     }
@@ -140,12 +162,14 @@ var BeerView = React.createClass({
                     <button onClick={this.props.edit}>Edit</button>
                     <button onClick={this.props.delete}>Delete</button>
                 </div>
-                {this.state.beer.name ? <div className="beer-info__row"><label>Name</label>{this.state.beer.name}</div> : null}
-                {this.state.beer.brewery ? <div className="beer-info__row"><label>Brewery</label>{this.state.beer.brewery}</div> : null}
-                {this.state.beer.beer_type ? <div className="beer-info__row"><label>Type</label>{this.state.beer.beer_type}</div> : null}
-                {this.state.beer.abv ? <div className="beer-info__row"><label>Abv</label>{this.state.beer.abv}%</div> : null}
-                {this.state.beer.country ? <div className="beer-info__row"><label>Country</label>{this.state.beer.country}</div> : null}
-                <div className="beer-info__row"><label>To-do</label>{this.state.beer.todo ? "Yes" : "No"}</div>
+                {this.state.beer.name ? <div className="beer-info__field"><label>Name</label>{this.state.beer.name}</div> : null}
+                {this.state.beer.brewery ? <div className="beer-info__field"><label>Brewery</label>{this.state.beer.brewery}</div> : null}
+                {this.state.beer.beer_type ? <div className="beer-info__field"><label>Type</label>{this.state.beer.beer_type}</div> : null}
+                {this.state.beer.abv ? <div className="beer-info__field"><label>Abv</label>{this.state.beer.abv}%</div> : null}
+                {this.state.beer.hops ? <div className="beer-info__field"><label>Hops</label>{this.state.beer.hops}</div> : null}
+                {this.state.beer.country ? <div className="beer-info__field"><label>Country</label>{this.state.beer.country}</div> : null}
+                {this.state.beer.rating ? <div className="beer-info__field"><label>Rating</label>{this.state.beer.rating}</div> : null}
+                <div className="beer-info__field"><label>To-do</label>{this.state.beer.todo ? "Yes" : "No"}</div>
             </div>
         )
     }
@@ -162,7 +186,9 @@ var BeerEdit = React.createClass({
             brewery: this.refs.updateForm.getDOMNode().elements.brewery.value,
             beer_type: this.refs.updateForm.getDOMNode().elements.beer_type.value,
             abv: this.refs.updateForm.getDOMNode().elements.abv.valueAsNumber,
+            hops: this.refs.updateForm.getDOMNode().elements.hops.value,
             country: this.refs.updateForm.getDOMNode().elements.country.value,
+            rating: this.refs.updateForm.getDOMNode().elements.rating.valueAsNumber,
             todo: this.refs.updateForm.getDOMNode().elements.todo.checked
         };
         if(this.state.addingBeer) {
@@ -179,12 +205,14 @@ var BeerEdit = React.createClass({
         return (
             <form className="beer-info" ref="updateForm" onSubmit={this.formSubmit}>
                 <div className="beer-info__header"></div>
-                <div className="beer-info__row"><label>Name</label><input type="text" name="name" defaultValue={this.state.addingBeer ? null : this.state.beer.name}/></div>
-                <div className="beer-info__row"><label>Brewery</label><input type="text" name="brewery" defaultValue={this.state.addingBeer ? null : this.state.beer.brewery}/></div>
-                <div className="beer-info__row"><label>Type</label><input type="text" name="beer_type" defaultValue={this.state.addingBeer ? null : this.state.beer.beer_type}/></div>
-                <div className="beer-info__row"><label>Abv</label><input type="number" step="0.1" name="abv" defaultValue={this.state.addingBeer ? null : this.state.beer.abv}/></div>
-                <div className="beer-info__row"><label>Country</label><input type="text" name="country" defaultValue={this.state.addingBeer ? null : this.state.beer.country}/></div>
-                <div className="beer-info__row"><label>To-do</label><input type="checkbox" name="todo" defaultChecked={this.state.addingBeer ? false : this.state.beer.todo} onChange={this.todoHandler} /></div>
+                <div className="beer-info__field"><label>Name</label><input type="text" name="name" defaultValue={this.state.addingBeer ? null : this.state.beer.name}/></div>
+                <div className="beer-info__field"><label>Brewery</label><input type="text" name="brewery" defaultValue={this.state.addingBeer ? null : this.state.beer.brewery}/></div>
+                <div className="beer-info__field"><label>Type</label><input type="text" name="beer_type" defaultValue={this.state.addingBeer ? null : this.state.beer.beer_type}/></div>
+                <div className="beer-info__field"><label>Abv</label><input type="number" step="0.1" min="0" max="100" name="abv" defaultValue={this.state.addingBeer ? null : this.state.beer.abv}/></div>
+                <div className="beer-info__field"><label>Hops</label><input type="text" name="hops" defaultValue={this.state.addingBeer ? null : this.state.beer.hops}/></div>
+                <div className="beer-info__field"><label>Country</label><input type="text" name="country" defaultValue={this.state.addingBeer ? null : this.state.beer.country}/></div>
+                <div className="beer-info__field"><label>Rating</label><input type="number" step="1" min="1" max="100" name="rating" defaultValue={this.state.addingBeer ? null : this.state.beer.rating}/></div>
+                <div className="beer-info__field"><label>To-do</label><input type="checkbox" name="todo" defaultChecked={this.state.addingBeer ? false : this.state.beer.todo} onChange={this.todoHandler} /></div>
                 <div className="beer-info__footer">
                     <input type="submit" value="Save" /> <button onClick={this.props.cancel}>Cancel</button>
                 </div>
