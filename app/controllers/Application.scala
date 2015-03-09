@@ -21,7 +21,8 @@ object Application extends Controller {
             "hops" -> beer.hops,
             "country" -> beer.country,
             "rating" -> beer.rating,
-            "todo" -> beer.todo
+            "todo" -> beer.todo,
+            "image" -> beer.image
         )
     }
     
@@ -34,7 +35,8 @@ object Application extends Controller {
         (JsPath \ "hops").readNullable[String] and
         (JsPath \ "country").readNullable[String] and
         (JsPath \ "rating").readNullable[Int] and
-        (JsPath \ "todo").readNullable[Boolean]
+        (JsPath \ "todo").readNullable[Boolean] and
+        (JsPath \ "image").readNullable[String]
     )(Beer.apply _)
     
     try {
@@ -89,7 +91,8 @@ object Application extends Controller {
                         beer.hops,
                         beer.country,
                         beer.rating,
-                        beer.todo
+                        beer.todo,
+                        beer.image
                     )
                     Beer.save(saveBeer)
                     printToFile(new File("beers.json")) { p =>
@@ -104,12 +107,14 @@ object Application extends Controller {
     def updateBeer(id: Int) = Action(BodyParsers.parse.json) { request =>
         if(Beer.list.find(beer => beer.id.get == id) != None) {
             val oldValues = Beer.list.find(beer => beer.id.get == id).get
+            Predef.println(request.body)
             val updateBeerResult = Json.fromJson(request.body)
             updateBeerResult.fold(
                 errors => {
                     BadRequest(Json.obj("success" ->false, "errors" -> JsError.toFlatJson(errors)))
                 },
                 beer => {
+                    Predef.println(beer)
                     val validation = Beer.validateBeer(beer)
                     if(!validation.isEmpty) {
                         BadRequest(Json.obj("success" -> false, "errors" -> Json.toJson(validation)))
@@ -123,7 +128,8 @@ object Application extends Controller {
                             if (beer.hops != None) beer.hops else oldValues.hops,
                             if (beer.country != None) beer.country else oldValues.country,
                             if (beer.rating != None) beer.rating else oldValues.rating,
-                            if (beer.todo != None) beer.todo else oldValues.todo
+                            if (beer.todo != None) beer.todo else oldValues.todo,
+                            if (beer.image != None) beer.image else oldValues.image
                         )
                         val updatedList = Beer.list.updated(Beer.list.indexOf(Beer.list.find(beer => beer.id.get == id).get), updateBeer)
                         Beer.list = updatedList

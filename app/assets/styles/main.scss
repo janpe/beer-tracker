@@ -249,4 +249,8 @@ header {
     &:first-child label {
         margin-top: 0;
     }
+    
+    img {
+        max-width: 100%;
+    }
 }

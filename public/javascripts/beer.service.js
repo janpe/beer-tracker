@@ -85,7 +85,6 @@ beerService = (function () {
     
     // PUT updated item
     putItem = function(putBeer) {
-        console.log(putBeer);
         var xmlHttp = null;
         xmlHttp = new XMLHttpRequest();
         xmlHttp.open("PUT", apiPath+"/"+putBeer.id, true);

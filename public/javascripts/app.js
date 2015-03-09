@@ -170,6 +170,7 @@ var BeerView = React.createClass({
                 {this.state.beer.country ? <div className="beer-info__field"><label>Country</label>{this.state.beer.country}</div> : null}
                 {this.state.beer.rating ? <div className="beer-info__field"><label>Rating</label>{this.state.beer.rating}</div> : null}
                 <div className="beer-info__field"><label>To-do</label>{this.state.beer.todo ? "Yes" : "No"}</div>
+                {this.state.beer.image ? <div className="beer-info__field"><label>Image</label><img src={this.state.beer.image} /></div> : null}
             </div>
         )
     }
@@ -177,10 +178,18 @@ var BeerView = React.createClass({
 
 var BeerEdit = React.createClass({
     getInitialState: function() {
-        return {beer: this.props.beer, addingBeer: this.props.addingBeer ? true : false};
+        return {beer: this.props.beer, addingBeer: this.props.addingBeer ? true : false, imageCleared: false, imageLoading: false};
     },
     formSubmit: function(e) {
         e.preventDefault();
+        var image = "";
+        if(!this.state.imageCleared) {
+            if(typeof(this.state.imageDataUri) != 'undefined') {
+                image = this.state.imageDataUri;
+            } else if(typeof(this.state.beer.image) != 'undefined') {
+                image = this.state.beer.image;
+            }
+        }
         var submitBeer = {
             name: this.refs.updateForm.getDOMNode().elements.name.value,
             brewery: this.refs.updateForm.getDOMNode().elements.brewery.value,
@@ -189,7 +198,8 @@ var BeerEdit = React.createClass({
             hops: this.refs.updateForm.getDOMNode().elements.hops.value,
             country: this.refs.updateForm.getDOMNode().elements.country.value,
             rating: this.refs.updateForm.getDOMNode().elements.rating.valueAsNumber,
-            todo: this.refs.updateForm.getDOMNode().elements.todo.checked
+            todo: this.refs.updateForm.getDOMNode().elements.todo.checked,
+            image: image
         };
         if(this.state.addingBeer) {
             this.props.save(submitBeer, true);
@@ -201,9 +211,25 @@ var BeerEdit = React.createClass({
     todoHandler: function(e) {
         this.setState({todo: !e.target.checked});
     },
+    imageHandler: function(e) {
+        var self = this;
+        var reader = new FileReader();
+        var file = e.target.files[0];
+        this.setState({imageCleared: false, imageLoading: true});
+
+        reader.onload = function(upload) {
+            self.setState({imageDataUri: upload.target.result, imageLoading: false});
+        }
+
+        reader.readAsDataURL(file);
+    },
+    clearImage: function() {
+        this.setState({imageCleared: true});
+        this.state.beer.image = null;
+    },
     render: function() {
         return (
-            <form className="beer-info" ref="updateForm" onSubmit={this.formSubmit}>
+            <form className="beer-info" ref="updateForm" onSubmit={this.formSubmit} encType="multipart/form-data">
                 <div className="beer-info__header"></div>
                 <div className="beer-info__field"><label>Name</label><input type="text" name="name" defaultValue={this.state.addingBeer ? null : this.state.beer.name}/></div>
                 <div className="beer-info__field"><label>Brewery</label><input type="text" name="brewery" defaultValue={this.state.addingBeer ? null : this.state.beer.brewery}/></div>
@@ -213,8 +239,9 @@ var BeerEdit = React.createClass({
                 <div className="beer-info__field"><label>Country</label><input type="text" name="country" defaultValue={this.state.addingBeer ? null : this.state.beer.country}/></div>
                 <div className="beer-info__field"><label>Rating</label><input type="number" step="1" min="1" max="100" name="rating" defaultValue={this.state.addingBeer ? null : this.state.beer.rating}/></div>
                 <div className="beer-info__field"><label>To-do</label><input type="checkbox" name="todo" defaultChecked={this.state.addingBeer ? false : this.state.beer.todo} onChange={this.todoHandler} /></div>
+                <div className="beer-info__field"><label>Image</label>{this.state.beer.image ? <div><img src={this.state.beer.image} /><button onClick={this.clearImage}>Remove current image</button></div> : null}<input type="file" name="image" onChange={this.imageHandler} accept="image/x-png, image/gif, image/jpeg" /></div>
                 <div className="beer-info__footer">
-                    <input type="submit" value="Save" /> <button onClick={this.props.cancel}>Cancel</button>
+                    <input type="submit" value="Save" disabled={this.state.imageLoading} /> <button onClick={this.props.cancel}>Cancel</button>
                 </div>
             </form>
         )
