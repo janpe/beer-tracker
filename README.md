@@ -6,6 +6,8 @@ Backend written in Scala using Play Framework. play-sass plugin used for compili
 
 Frontend built with React. Bourbon Neat used for some responsive styles.
 
+This is my first time using both Scala and React so feel free to give me feedback on the code!
+
 ## Running the app
 
 To run the app install Play Framework through Typesafe Activator ([https://www.playframework.com/documentation/2.3.x/Installing](https://www.playframework.com/documentation/2.3.x/Installing)) and run it with the command.
